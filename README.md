@@ -113,6 +113,7 @@ Increase below value if you expect big data frames (or decrease for devices with
 
 ```cpp
 #include <WebSocketServer.h>
+using namespace net;
 
 WebSocketServer server(3000);
 
@@ -146,6 +147,7 @@ void loop() {
 
 ```cpp
 #include <WebSocketClient.h>
+using namespace net;
 
 WebSocketClient client;
 
@@ -232,9 +234,9 @@ Following screenshots shows Rasperry Pi server, browser client and Arduino clien
 
 | Board  | Program space | Dynamic memory |
 | :---: | :---: | :---: | 
-| Generic ESP8266  | 265108 bytes (53%)  | 33624 bytes (41%) |
-| WeMos D1 | 265108 bytes (25%) | 33624 bytes (41%) |
-| NodeMCU | 265108 bytes (25%) | 33624 bytes (41%) |
+| Generic ESP8266  | 265044 bytes (53%)  | 33496 bytes (40%) |
+| WeMos D1 | 265044 bytes (25%) | 33496 bytes (40%) |
+| NodeMCU | 265044 bytes (25%) | 33496 bytes (40%) |
 
 ## Ethernet "2" library modification
 
