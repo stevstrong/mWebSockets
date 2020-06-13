@@ -9,7 +9,8 @@ before_install:
   - tar xf arduino-$ARD_VER-linux64.tar.xz
   - sudo mv arduino-$ARD_VER /usr/local/share/arduino
   - sudo ln -s /usr/local/share/arduino/arduino /usr/local/bin/arduino
-  - sudo mv ./src /usr/local/share/arduino/libraries/mWebSockets/src
+  - sudo mkdir -p /usr/local/share/arduino/libraries/mWebSockets/
+  - sudo mv ./src /usr/local/share/arduino/libraries/mWebSockets/
   
 # - git clone --depth=50 --branch=master https://github.com/adamvr/arduino-base64 /usr/local/share/arduino/libraries/arduino-base64
 # - wget https://github.com/skaarj1989/mWebSockets/blob/master/CryptoLegacy.tar.gz
