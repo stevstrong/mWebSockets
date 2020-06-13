@@ -3,40 +3,43 @@ using namespace net;
 
 #if PLATFORM_ARCH == PLATFORM_ARCHITECTURE_SAMD21
 #  define _SERIAL SerialUSB
-constexpr char platform[]{ "SAMD21%20/%20W5100" };
+constexpr char kPlatform[]{ "SAMD21" };
 #else
 #  define _SERIAL Serial
 #  if PLATFORM_ARCH == PLATFORM_ARCHITECTURE_AVR
-constexpr char platform[]{ "AVR%20/%20W5500" };
+constexpr char kPlatform[]{ "AVR" };
 #  elif PLATFORM_ARCH == PLATFORM_ARCHITECTURE_ESP8266
-constexpr char platform[]{ "ESP8266" };
+constexpr char kPlatform[]{ "ESP8266" };
+#  elif PLATFORM_ARCH == PLATFORM_ARCHITECTURE_ESP32
+constexpr char kPlatform[]{ "ESP32" };
+#  elif PLATFORM_ARCH == PLATFORM_ARCHITECTURE_STM32
+constexpr char kPlatform[]{ "STM32" };
 #  endif
 #endif
 
 #if NETWORK_CONTROLLER == NETWORK_CONTROLLER_WIFI
-constexpr char SSID[]{ "SKYNET" };
-constexpr char password[]{ "***" };
+constexpr char kSSID[]{ "SKYNET" };
+constexpr char kPassword[]{ "***" };
 
-constexpr char lib[]{ "WiFi" };
+constexpr char kNetworkLib[]{ "WiFi" };
 #else
+char ethController[9]{};
 byte mac[]{ 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 IPAddress ip(192, 168, 46, 180);
 
-#  if NETWORK_CONTROLLER == ETHERNET_CONTROLLER_W5100
-constexpr char lib[]{ "Ethernet" };
-#  elif NETWORK_CONTROLLER == ETHERNET_CONTROLLER_W5500
-constexpr char lib[]{ "Ethernet%20%222%22" };
+#  if NETWORK_CONTROLLER == ETHERNET_CONTROLLER_W5X00
+constexpr char kNetworkLib[]{ "Ethernet" };
 #  elif NETWORK_CONTROLLER == ETHERNET_CONTROLLER_ENC28J60
-constexpr char lib[]{ "UIPEthernet" };
+constexpr char kNetworkLib[]{ "UIPEthernet" };
 #  endif
 #endif
 
 WebSocketClient client;
 
-constexpr char host[]{ "192.168.46.31" };
-constexpr uint16_t port = 9001;
+constexpr char kHost[]{ "192.168.46.31" };
+constexpr uint16_t kPort = 9001;
 
-const uint16_t cases[]{
+const uint16_t kCases[]{
   //
   // 1. Framing:
   //
@@ -154,59 +157,86 @@ const uint16_t cases[]{
   //297, 298, 299, 300
 };
 
+constexpr size_t kNumCases = sizeof(kCases) / sizeof(uint16_t);
+
 void nextTest() {
-  static const size_t numCases = sizeof(cases) / sizeof(uint16_t);
   static bool done = false;
   static uint16_t idx = 0;
-
   static char path[80]{};
 
   if (done) return;
   
-  if (idx != numCases) {
-    uint16_t test = cases[idx++];
-    snprintf_P(path, sizeof(path), (PGM_P)F("/runCase?case=%d&agent=%s%s%s"),
-      test, platform, "%20/%20", lib);
+  char agent[64]{};
+  static const auto kSeparator = (PGM_P) "%20/%20";
+#if NETWORK_CONTROLLER == NETWORK_CONTROLLER_WIFI
+  snprintf_P(agent, sizeof(agent), "%s%s%s", kPlatform, kSeparator, kNetworkLib);
+#else
+  snprintf_P(agent, sizeof(agent), (PGM_P)F("%s%s%s%s%s"), kPlatform, kSeparator,
+    ethController, kSeparator, kNetworkLib);
+#endif
+
+  if (idx != kNumCases) {
+    uint16_t test = kCases[idx++];
+    snprintf_P(
+      path, sizeof(path), (PGM_P)F("/runCase?case=%u&agent=%s"), test, agent);
   } else {
-    snprintf_P(path, sizeof(path), (PGM_P)F("/updateReports?agent=%s%s%s"),
-      platform, "%20/%20", lib);
+    snprintf_P(path, sizeof(path), (PGM_P)F("/updateReports?agent=%s"), agent);
     done = true;
   }
 
   delay(100);
 
   _SERIAL.println(path);
-  client.open(host, port, path);
+  client.open(kHost, kPort, path);
 }
 
 void setup() {
   _SERIAL.begin(115200);
-  while (!_SERIAL);
+  while (!_SERIAL)
+    ;
 
 #if NETWORK_CONTROLLER == NETWORK_CONTROLLER_WIFI
   //_SERIAL.setDebugOutput(true);
-  _SERIAL.printf("\nConnecting to %s ", SSID);
+  _SERIAL.printf("\nConnecting to %s ", kSSID);
 
   WiFi.mode(WIFI_STA);
-  WiFi.begin(SSID, password);
+  WiFi.begin(kSSID, kPassword);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500); _SERIAL.print(F("."));
   }
 
   _SERIAL.println(F(" connected"));
-
   WiFi.printDiag(_SERIAL);
 
   _SERIAL.print(F("Device IP: "));
   _SERIAL.println(WiFi.localIP());
 #else
   _SERIAL.println(F("Initializing ... "));
-
-# if NETWORK_CONTROLLER == ETHERNET_CONTROLLER_W5100
-  //Ethernet.init(53);
-# endif
-
   Ethernet.begin(mac, ip);
+
+# if NETWORK_CONTROLLER == ETHERNET_CONTROLLER_W5X00
+  //Ethernet.init(53); // Mega2560
+#    if PLATFORM_ARCH == PLATFORM_ARCHITECTURE_STM32
+  Ethernet.init(PA4);
+#    endif
+  
+  switch (Ethernet.hardwareStatus()) {
+  case EthernetW5100:
+    strcpy_P(ethController, (PGM_P)F("W5100"));
+    break;
+  case EthernetW5200:
+    strcpy_P(ethController, (PGM_P)F("W5200"));
+    break;
+  case EthernetW5500:
+    strcpy_P(ethController, (PGM_P)F("W5500"));
+    break;
+
+  default:
+    break;
+  }
+#  elif NETWORK_CONTROLLER == ETHERNET_CONTROLLER_ENC28J60
+  strcpy_P(ethController, (PGM_P)F("ENC28j60"));
+# endif
 
   _SERIAL.print(F("Device IP: "));
   _SERIAL.println(Ethernet.localIP());

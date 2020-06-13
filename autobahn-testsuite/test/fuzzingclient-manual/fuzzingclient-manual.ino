@@ -25,9 +25,9 @@ using namespace net;
 #  define _SERIAL Serial
 #endif
 
-#define BUFFER_SIZE 64
-char buffer[BUFFER_SIZE]{};
-char tempBuffer[BUFFER_SIZE]{};
+constexpr uint8_t kCmdBufferSize = 64;
+char cmdBuffer[kCmdBufferSize]{};
+char tempBuffer[kCmdBufferSize]{};
 
 bool newData = false;
 
@@ -36,8 +36,8 @@ char path[48]{};
 uint16_t port = 3000;
 
 #if NETWORK_CONTROLLER == NETWORK_CONTROLLER_WIFI
-const char SSID[]{ "SKYNET" };
-const char password[]{ "***" };
+const char kSSID[]{ "SKYNET" };
+const char kPassword[]{ "***" };
 #else
 byte mac[]{ 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 // IPAddress ip(192, 168, 46, 179);
@@ -52,10 +52,10 @@ void setup() {
 
 #if NETWORK_CONTROLLER == NETWORK_CONTROLLER_WIFI
   //_SERIAL.setDebugOutput(true);
-  _SERIAL.printf("\nConnecting to %s ", SSID);
+  _SERIAL.printf("\nConnecting to %s ", kSSID);
 
   WiFi.mode(WIFI_STA);
-  WiFi.begin(SSID, password);
+  WiFi.begin(kSSID, kPassword);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     _SERIAL.print(F("."));
@@ -70,7 +70,7 @@ void setup() {
 #else
   _SERIAL.println(F("Initializing ... "));
 
-#  if NETWORK_CONTROLLER == ETHERNET_CONTROLLER_W5100
+#  if NETWORK_CONTROLLER == ETHERNET_CONTROLLER_W5X00
   // Ethernet.init(53);
 #  endif
 
@@ -102,11 +102,11 @@ void loop() {
 
     if (recvInProgress == true) {
       if (c != '>') {
-        buffer[idx++] = c;
+        cmdBuffer[idx++] = c;
 
-        if (idx >= BUFFER_SIZE) idx = BUFFER_SIZE - 1;
+        if (idx >= kCmdBufferSize) idx = kCmdBufferSize - 1;
       } else {
-        buffer[idx] = '\0';
+        cmdBuffer[idx] = '\0';
         recvInProgress = false;
         idx = 0;
         newData = true;
@@ -116,7 +116,7 @@ void loop() {
   }
 
   if (newData == true) {
-    strcpy(tempBuffer, buffer);
+    strcpy(tempBuffer, cmdBuffer);
 
     char *ptr = strtok(tempBuffer, ",");
     strcpy(host, ptr);
