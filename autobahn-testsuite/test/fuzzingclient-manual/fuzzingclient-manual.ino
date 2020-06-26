@@ -71,7 +71,8 @@ void setup() {
   _SERIAL.println(F("Initializing ... "));
 
 #  if NETWORK_CONTROLLER == ETHERNET_CONTROLLER_W5X00
-  // Ethernet.init(53);
+  // Ethernet.init(5); // ESPDUINO-32
+  // Ethernet.init(53); // Mega2560
 #  endif
 
   Ethernet.begin(mac); //, ip);

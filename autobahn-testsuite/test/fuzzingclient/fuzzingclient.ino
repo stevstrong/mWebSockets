@@ -215,7 +215,8 @@ void setup() {
   Ethernet.begin(mac, ip);
 
 # if NETWORK_CONTROLLER == ETHERNET_CONTROLLER_W5X00
-  //Ethernet.init(53); // Mega2560
+  // Ethernet.init(5); // ESPDUINO-32
+  // Ethernet.init(53); // Mega2560
 #    if PLATFORM_ARCH == PLATFORM_ARCHITECTURE_STM32
   Ethernet.init(PA4);
 #    endif

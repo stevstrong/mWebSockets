@@ -101,12 +101,12 @@ constexpr uint16_t kBufferMaxSize = 256;
 
 If you have **WeMos D1** in size of **Arduino Uno** simply attaching shield does not work, you have to wire **ICSP** on **Ethernet Shield** to proper pins.
 
-| Ethernet Shield <br> W5100/W5500 | Arduino Uno / <br> Mega2560 | Arduino <br> Pro Mini | Arduino Zero | WeMos D1 | STM32 <br> "Blue Pill" |
-| :---: | :---: | :---: | :---: | :---: | :---: |
-| (ICSP) MISO  | (ICSP) MISO  | PIN 12 | (ICSP) MISO | D12 / MISO | A6 |
-| (ICSP) MOSI  | (ICSP) MOSI  | PIN 11 | (ICSP) MOSI | D11 / MOSI | A7 |
-| (ICSP) SCK  | (ICSP) SCK | PIN 13 | (ICSP) SCK | D13 / SCK | A5 |
-| (SS) PIN 10  | PIN 10 | PIN 10 | PIN 10 | D10 / SS | A4 |
+| Ethernet Shield <br> W5100/W5500 | Arduino Uno / <br> Mega2560 | Arduino <br> Pro Mini | Arduino Zero | WeMos D1 | ESP32 | STM32 <br> "Blue Pill" |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| (ICSP) MISO  | (ICSP) MISO  | PIN 12 | (ICSP) MISO | D12 / MISO | IO35 | A6 |
+| (ICSP) MOSI  | (ICSP) MOSI  | PIN 11 | (ICSP) MOSI | D11 / MOSI | IO33 | A7 |
+| (ICSP) SCK  | (ICSP) SCK | PIN 13 | (ICSP) SCK | D13 / SCK | IO25 | A5 |
+| (SS) PIN 10  | PIN 10 | PIN 10 | PIN 10 | D10 / SS | IOC | A4 |
 
 | W5500 / <br> ENC28j60  | Arduino Uno / <br> Pro Mini | Arduino <br> Mega2560 |
 | :---: | :---: | :---: | 
