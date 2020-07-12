@@ -12,11 +12,11 @@ constexpr char kSSID[]{ "SKYNET" };
 constexpr char kPassword[]{ "***" };
 #else
 byte mac[]{ 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
-IPAddress ip(192, 168, 46, 180);
+IPAddress ip{ 192, 168, 46, 180 };
 #endif
 
-constexpr uint16_t port = 3000;
-WebSocketServer wss(port);
+constexpr uint16_t kPort{ 3000 };
+WebSocketServer wss{ kPort };
 
 void setup() {
   _SERIAL.begin(115200);
@@ -44,17 +44,15 @@ void setup() {
   _SERIAL.println(F("Initializing ... "));
 
 #  if NETWORK_CONTROLLER == ETHERNET_CONTROLLER_W5X00
-  // Ethernet.init(5); // ESPDUINO-32
-  // Ethernet.init(53); // Mega2560
+   //Ethernet.init(SS);
 
-#  endif
-  
   Ethernet.begin(mac, ip);
+#  endif
 
   _SERIAL.print(F("Server running at "));
   _SERIAL.print(Ethernet.localIP());
   _SERIAL.print(F(":"));
-  _SERIAL.println(port);
+  _SERIAL.println(kPort);
 #endif
 
   wss.onConnection([](WebSocket &ws) {
@@ -80,13 +78,11 @@ void setup() {
     _SERIAL.print(F("New client: "));
     _SERIAL.println(ws.getRemoteIP());
 
-    const char message[]{ "Hello from Arduino server!" };
+    constexpr char message[]{ "Hello from Arduino server!" };
     ws.send(WebSocket::DataType::TEXT, message, strlen(message));
   });
 
   wss.begin();
 }
-
-uint32_t previousTime = 0;
 
 void loop() { wss.listen(); }

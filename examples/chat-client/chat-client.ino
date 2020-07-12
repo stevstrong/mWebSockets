@@ -12,12 +12,12 @@ const char SSID[]{ "SKYNET" };
 const char password[]{ "***" };
 #else
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
-// IPAddress ip(192, 168, 46, 179);
+// IPAddress ip{ 192, 168, 46, 179 };
 #endif
 
-#define BUFFER_SIZE 64
-char message[BUFFER_SIZE]{};
-bool newData = false;
+constexpr auto kBufferSize = 64;
+char message[kBufferSize]{};
+bool newData{ false };
 
 WebSocketClient client;
 
@@ -79,19 +79,17 @@ void setup() {
 uint32_t previousTime = 0;
 
 void loop() {
-  static bool recvInProgress = false;
-  static byte idx = 0;
-
-  char c;
+  static bool recvInProgress{ false };
+  static byte idx{ 0 };
 
   while (_SERIAL.available() > 0 && newData == false) {
-    c = _SERIAL.read();
+    char c{ _SERIAL.read() };
 
     if (recvInProgress) {
       if (c != '>') {
         message[idx++] = c;
 
-        if (idx >= BUFFER_SIZE) idx = BUFFER_SIZE - 1;
+        if (idx >= kBufferSize) idx = kBufferSize - 1;
       } else {
         message[idx] = '\0';
         recvInProgress = false;
@@ -109,10 +107,9 @@ void loop() {
 
   client.listen();
 
-  uint32_t currentTime = millis();
+  uint32_t currentTime{ millis() };
   if (currentTime - previousTime > 1000) {
     previousTime = currentTime;
-
     client.ping();
   }
 }

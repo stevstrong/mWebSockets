@@ -12,10 +12,10 @@ constexpr char kSSID[]{ "SKYNET" };
 constexpr char kPassword[]{ "***" };
 #else
 byte mac[]{ 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
-IPAddress ip(192, 168, 46, 180);
+IPAddress ip{ 192, 168, 46, 180 };
 #endif
 
-const uint16_t kPort = 9001;
+const uint16_t kPort{ 9001 };
 WebSocketServer server(kPort);
 
 void setup() {
@@ -46,7 +46,7 @@ void setup() {
   // Ethernet.init(5); // ESPDUINO-32
   // Ethernet.init(53); // Mega2560
 #    if PLATFORM_ARCH == PLATFORM_ARCHITECTURE_STM32
-  Ethernet.init(PA4);
+  //Ethernet.init(PA4);
 #    endif
 #  endif
 

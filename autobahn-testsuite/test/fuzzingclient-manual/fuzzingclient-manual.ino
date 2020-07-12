@@ -25,22 +25,22 @@ using namespace net;
 #  define _SERIAL Serial
 #endif
 
-constexpr uint8_t kCmdBufferSize = 64;
+constexpr uint8_t kCmdBufferSize{ 64 };
 char cmdBuffer[kCmdBufferSize]{};
 char tempBuffer[kCmdBufferSize]{};
 
-bool newData = false;
+bool newData{ false };
 
 char host[32]{};
 char path[48]{};
-uint16_t port = 3000;
+uint16_t port{ 3000 };
 
 #if NETWORK_CONTROLLER == NETWORK_CONTROLLER_WIFI
 const char kSSID[]{ "SKYNET" };
 const char kPassword[]{ "***" };
 #else
 byte mac[]{ 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
-// IPAddress ip(192, 168, 46, 179);
+// IPAddress ip{ 192, 168, 46, 179 };
 #endif
 
 WebSocketClient client;
@@ -93,14 +93,13 @@ void setup() {
 }
 
 void loop() {
-  static bool recvInProgress = false;
-  static byte idx = 0;
+  static bool recvInProgress{ false };
+  static byte idx{ 0 };
 
-  char c;
+  //char c;
 
   while (_SERIAL.available() > 0 && newData == false) {
-    c = _SERIAL.read();
-
+    char c{ _SERIAL.read() };
     if (recvInProgress == true) {
       if (c != '>') {
         cmdBuffer[idx++] = c;
@@ -119,7 +118,7 @@ void loop() {
   if (newData == true) {
     strcpy(tempBuffer, cmdBuffer);
 
-    char *ptr = strtok(tempBuffer, ",");
+    char *ptr{ strtok(tempBuffer, ",") };
     strcpy(host, ptr);
 
     ptr = strtok(nullptr, ",");

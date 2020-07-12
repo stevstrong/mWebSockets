@@ -12,7 +12,7 @@ constexpr char kSSID[]{ "SKYNET" };
 constexpr char kPassword[]{ "***" };
 #else
 byte mac[]{ 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
-// IPAddress ip(192, 168, 46, 179);
+// IPAddress ip{ 192, 168, 46, 179 };
 #endif
 
 WebSocketClient client;
@@ -56,7 +56,7 @@ void setup() {
   client.onOpen([](WebSocket &ws) {
     _SERIAL.println(F("Connected"));
 
-    const char message[]{ "Hello from Arduino client!" };
+    constexpr char message[]{ "Hello from Arduino client!" };
     ws.send(WebSocket::DataType::TEXT, message, strlen(message));
   });
 
@@ -64,7 +64,7 @@ void setup() {
                      const char *message, uint16_t length) {
     switch (dataType) {
     case WebSocket::DataType::TEXT:
-      _SERIAL.print(F("Received: "));
+      _SERIAL.println(F("Received text message"));
       _SERIAL.println(message);
       break;
     case WebSocket::DataType::BINARY:
@@ -77,7 +77,7 @@ void setup() {
 
   client.onClose(
     [](WebSocket &ws, const WebSocket::CloseCode &code, const char *reason,
-      uint16_t length) { _SERIAL.println(F("Disconnected\n")); });
+      uint16_t length) { _SERIAL.println(F("Disconnected")); });
 
   if (!client.open("192.168.46.31", 3000)) {
     _SERIAL.println(F("Connection failed!"));
