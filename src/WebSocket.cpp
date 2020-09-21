@@ -25,7 +25,7 @@ constexpr bool isCloseCodeValid(uint16_t code) {
 }
 
 void generateSecKey(char output[]) {
-  constexpr auto kLength = 16;
+  constexpr auto kLength{ 16 };
   char temp[kLength + 1]{};
 
   randomSeed(analogRead(0));
@@ -36,11 +36,11 @@ void generateSecKey(char output[]) {
 }
 
 bool encodeSecKey(char output[], const char *key) {
-  constexpr auto kSecKeyLength = 24;
+  constexpr auto kSecKeyLength{ 24 };
   constexpr char kMagicString[]{ "258EAFA5-E914-47DA-95CA-C5AB0DC85B11" };
-  constexpr auto kMagicStringLenght = sizeof(kMagicString) - 1;
+  constexpr auto kMagicStringLenght{ sizeof(kMagicString) - 1 };
   
-  constexpr auto kBufferLength = kSecKeyLength + kMagicStringLenght;
+  constexpr auto kBufferLength{ kSecKeyLength + kMagicStringLenght };
   char buffer[kBufferLength + 1]{};
   memcpy(&buffer[0], key, kSecKeyLength);
   memcpy(&buffer[kSecKeyLength], kMagicString, kMagicStringLenght);
@@ -313,7 +313,7 @@ void WebSocket::_readFrame() {
   
   bool usingTempBuffer = isControlFrame(header.opcode);
   char *payload{ nullptr };
-  size_t offset = 0;
+  size_t offset{ 0 };
 
   if (usingTempBuffer) {
     payload = new char[header.length + 1]{};
@@ -364,8 +364,6 @@ void WebSocket::_readFrame() {
 }
 
 bool WebSocket::_readHeader(header_t &header) {
-  int32_t bite{ -1 };
-
   char temp[2]{};
   if (!_read(temp, 2)) return false;
 
@@ -404,6 +402,7 @@ bool WebSocket::_readHeader(header_t &header) {
     }
   }
 
+  int32_t bite{ -1 };
   if (header.length == 126) {
     if ((bite = _read()) == -1) return false;
     header.length = bite << 8;

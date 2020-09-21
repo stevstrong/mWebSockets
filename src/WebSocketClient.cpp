@@ -215,7 +215,7 @@ bool WebSocketClient::_readResponse() {
 
       memset(buffer, '\0', sizeof(buffer));
       counter = 0;
-      currentLine++;
+      ++currentLine;
     }
   }
 
@@ -229,14 +229,12 @@ bool WebSocketClient::_validateHandshake(uint8_t flags) {
     _TRIGGER_ERROR(WebSocketError::UPGRADE_REQUIRED);
     return false;
   }
-
   if (!(flags & kValidConnectionHeader)) {
     __debugOutput(
       F("Error during WebSocket handshake: 'Connection' header is missing\n"));
     _TRIGGER_ERROR(WebSocketError::UPGRADE_REQUIRED);
     return false;
   }
-
   if (!(flags & kValidSecKey)) {
     __debugOutput(F("Error during WebSocket handshake: "
                     "'Sec-WebSocket-Accept' header missing or invalid\n"));

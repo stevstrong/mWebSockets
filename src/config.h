@@ -25,6 +25,6 @@
 #define NETWORK_CONTROLLER ETHERNET_CONTROLLER_W5X00
 
 /** Maximum size of data buffer - frame payload (in bytes). */
-constexpr uint16_t kBufferMaxSize = 256;
+constexpr uint16_t kBufferMaxSize{ 256 };
 /** Maximum time to wait for endpoint response (in milliseconds). */
-constexpr uint16_t kTimeoutInterval = 5000;
+constexpr uint16_t kTimeoutInterval{ 5000 };

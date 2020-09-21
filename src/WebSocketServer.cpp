@@ -97,7 +97,7 @@ uint8_t WebSocketServer::countClients() const {
   uint8_t count{ 0 };
   const auto end = &m_sockets[kMaxConnections];
   for (auto it = &m_sockets[0]; it != end; ++it)
-    if (*it && (*it)->isAlive()) count++;
+    if (*it && (*it)->isAlive()) ++count;
 
   return count;
 }
@@ -260,7 +260,7 @@ bool WebSocketServer::_handleRequest(NetClient &client) {
 
       memset(buffer, '\0', sizeof(buffer));
       counter = 0;
-      currentLine++;
+      ++currentLine;
     }
   }
 
@@ -270,16 +270,13 @@ bool WebSocketServer::_handleRequest(NetClient &client) {
 
 bool WebSocketServer::_isValidGET(char *line) {
   char *rest{ line };
-
   for (byte i = 0; rest != nullptr; ++i) {
     char *pch{ strtok_r(rest, " ", &rest) };
-
     switch (i) {
     case 0: {
       if (strcmp_P(pch, (PGM_P)F("GET")) != 0) {
         return false;
       }
-
       break;
     }
     case 1: {
@@ -289,7 +286,6 @@ bool WebSocketServer::_isValidGET(char *line) {
       if (strcmp_P(pch, (PGM_P)F("HTTP/1.1")) != 0) {
         return false;
       }
-
       break;
     }
     default:
