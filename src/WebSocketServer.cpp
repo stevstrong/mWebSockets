@@ -102,10 +102,6 @@ uint8_t WebSocketServer::countClients() const {
   return count;
 }
 
-void WebSocketServer::onConnection(const onConnectionCallback &callback) {
-  _onConnection = callback;
-}
-
 WebSocket *WebSocketServer::_getWebSocket(NetClient &client) const {
   const auto end = &m_sockets[kMaxConnections];
   for (auto it = &m_sockets[0]; it != end; ++it)

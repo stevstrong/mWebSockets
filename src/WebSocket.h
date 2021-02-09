@@ -232,7 +232,7 @@ public:
    * });
    * @endcode
    */
-  void onClose(const onCloseCallback &callback);
+  void onClose(const onCloseCallback &callback) { _onClose = callback; }
   /**
    * @brief Sets message handler function.
    * @code{.cpp}
@@ -242,7 +242,7 @@ public:
    * });
    * @endcode
    */
-  void onMessage(const onMessageCallback &callback);
+  void onMessage(const onMessageCallback &callback) { _onMessage = callback; }
 
 protected:
   /** @remark Reserved for WebSocketClient. */

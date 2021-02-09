@@ -208,13 +208,6 @@ void WebSocket::ping(const char *payload, uint16_t length) {
   _send(PING_FRAME, true, m_maskEnabled, payload, length);
 }
 
-void WebSocket::onClose(const onCloseCallback &callback) {
-  _onClose = callback;
-}
-
-void WebSocket::onMessage(const onMessageCallback &callback) {
-  _onMessage = callback;
-}
 
 //
 // Protected:

@@ -76,7 +76,7 @@ public:
    * @param callback Function that will be called for every successfully
    * connected client.
    */
-  void onConnection(const onConnectionCallback &callback);
+  void onConnection(const onConnectionCallback &callback) { _onConnection = callback; }
 
 private:
   /** @cond */
