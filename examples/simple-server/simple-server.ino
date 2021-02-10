@@ -111,7 +111,7 @@ void loop()
 {
 	wss.listen();
 
-	if ( ! wss.countClients() ) continue;
+	if ( ! wss.countClients() ) return;
 
 	int cnt;
 	if ( (cnt = _SERIAL.available())>0 )
@@ -127,7 +127,7 @@ void loop()
 			wss.broadcast(WebSocket::DataType::TEXT, in_str, cnt);
 	}
 	// send periodical heartbit message if any client is connected
-	if ( wss.countClients()>0 && (millis()-previousTime)>=TIME_INTERVAL )
+	if ( (millis()-previousTime)>=TIME_INTERVAL )
 	{
 		previousTime = millis();
 		wss.broadcast(WebSocket::DataType::TEXT, hb, sizeof(hb)-1);

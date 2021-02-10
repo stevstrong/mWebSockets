@@ -4,8 +4,6 @@
 
 #include "utility.h"
 
-namespace net {
-
 /**
  * @brief Generates Sec-WebSocket-Key value.
  * @param[out] output Array of 25 elements (with one for NULL).
@@ -185,7 +183,7 @@ public:
   WebSocket(const WebSocket &) = delete;
   WebSocket &operator=(const WebSocket &) = delete;
 
-  virtual ~WebSocket();
+  virtual ~WebSocket() { terminate(); }
 
   /**
    * @brief Sends close event.
@@ -200,15 +198,15 @@ public:
   void terminate();
 
   /** @return Endpoint connection status. */
-  const ReadyState &getReadyState() const;
+  const ReadyState &getReadyState() const { return m_readyState; }
   /** @brief Verifies endpoint connection. */
-  bool isAlive() const;
+  bool isAlive() const { return m_client.connected() && m_readyState != ReadyState::CLOSED; }
 
   /**
    * @return Endpoint IP address.
    * @remark For some microcontrollers it may be empty.
    */
-  IPAddress getRemoteIP() const;
+  IPAddress getRemoteIP() const { return fetchRemoteIp(m_client); }
 
   /**
    * @brief Sends message frame.
@@ -216,6 +214,10 @@ public:
    */
   void send(
     const WebSocket::DataType dataType, const char *message, uint16_t length);
+
+  void sendTXT(const char *message, uint16_t length) {
+	  send(WebSocket::DataType::TEXT, message, length); }
+
   /**
    * @brief Sends ping message.
    * @param payload Additional message, doesn't have to be NULL-terminated. Max length = 125.
@@ -246,9 +248,11 @@ public:
 
 protected:
   /** @remark Reserved for WebSocketClient. */
-  WebSocket();
+  // All frames sent from client to server are masked.
+  WebSocket() : m_readyState(ReadyState::CLOSED), m_maskEnabled(true) {}
   /** @remark Reserved for WebSocketServer. */
-  WebSocket(const NetClient &client);
+  WebSocket(const NetClient &client) : m_client(client),
+			m_readyState(ReadyState::OPEN), m_maskEnabled(false) {}
 
   /** @cond */
   int32_t _read();
@@ -291,5 +295,3 @@ constexpr uint8_t kValidConnectionHeader = 0x02;
 constexpr uint8_t kValidSecKey = 0x04;
 constexpr uint8_t kValidVersion = 0x08;
 /** @endcond */
-
-} // namespace net

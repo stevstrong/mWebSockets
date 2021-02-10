@@ -3,9 +3,7 @@
 /** @file */
 
 #include "WebSocket.h"
-#include "utility.h"
 
-namespace net {
 
 /**
  * @class WebSocketServer
@@ -51,6 +49,9 @@ public:
   /** @brief Sends message to all connected clients. */
   void broadcast(
     const WebSocket::DataType &dataType, const char *message, uint16_t length);
+
+	void broadcast(const char *message, uint16_t length) {
+		broadcast(WebSocket::DataType::TEXT, message, length); }
 
   /** @note Call this in main loop. */
   void listen();
@@ -104,5 +105,3 @@ private:
 /** @example ./simple-server/simple-server.ino
  * Example usage of WebSocketServer class
  */
-
-} // namespace net

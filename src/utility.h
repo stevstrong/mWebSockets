@@ -18,16 +18,19 @@
     }                                                                          \
   }
 
+
+//void printf(const __FlashStringHelper *fmt, ...);
+
 #ifdef _DEBUG
-#  define __debugOutput printf
+extern char dbg[];
+# define printf(...) { sprintf(dbg, __VA_ARGS__); Serial.print(dbg); }
 #else
-#  define __debugOutput(...)
+# define printf(...)
 #endif
 
-void printf(const __FlashStringHelper *fmt, ...);
+# define __debugOutput printf
+# define PRINTF printf
 
-namespace net {
 
 IPAddress fetchRemoteIp(const NetClient &client);
 
-} // namespace net

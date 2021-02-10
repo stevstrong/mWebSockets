@@ -4,8 +4,6 @@
 
 #include "WebSocket.h"
 
-namespace net {
-
 /**
  * @class WebSocketClient
  * @see https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_client_applications
@@ -34,7 +32,7 @@ public:
   void listen();
 
   /** @brief Sets callback that will be called on successfull connection. */
-  void onOpen(const onOpenCallback &onOpen);
+  void onOpen(const onOpenCallback &callback) { _onOpen = callback; }
   /**
    * @brief Sets error handler.
    * @code{.cpp}
@@ -47,7 +45,7 @@ public:
    * });
    * @endcode
    */
-  void onError(const onErrorCallback &onError);
+  void onError(const onErrorCallback &callback) { _onError = callback; }
 
 private:
   /** @cond */
@@ -66,5 +64,3 @@ private:
 /** @example ./simple-client/simple-client.ino
  * Example usage of WebSocketClient class
  */
-
-} // namespace net

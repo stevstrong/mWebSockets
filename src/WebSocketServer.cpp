@@ -1,51 +1,49 @@
 #include "WebSocketServer.h"
 
-namespace net {
-
 WebSocketServer::WebSocketServer(uint16_t port) : m_server(port) {}
 WebSocketServer::~WebSocketServer() { shutdown(); }
 
+//-----------------------------------------------------------------------------
 void WebSocketServer::begin(const verifyClientCallback &callback) {
   _verifyClient = callback;
   m_server.begin();
 }
-
+//-----------------------------------------------------------------------------
 void WebSocketServer::shutdown() {
-  const auto end = &m_sockets[kMaxConnections];
-  for (auto it = &m_sockets[0]; it != end; ++it) {
-    if (*it) {
+ for (uint8 i = 0; i<kMaxConnections; i++) {
+	auto it = &m_sockets[i];
+	if (*it) {
       (*it)->close(WebSocket::CloseCode::GOING_AWAY, true);
       SAFE_DELETE(*it);
-    }
+	}
   }
 
   // Here I shoud call somethig like m_server.close() but unfortunately
   // EthernetServer does not implement anything like that
   // #TODO server state enum?
 }
-
-void WebSocketServer::broadcast(
-  const WebSocket::DataType &dataType, const char *message, uint16_t length) {
-  const auto end = &m_sockets[kMaxConnections];
-  for (auto it = &m_sockets[0]; it != end; ++it) {
+//-----------------------------------------------------------------------------
+void WebSocketServer::broadcast(const WebSocket::DataType &dataType, const char *message, uint16_t length) {
+ for (uint8 i = 0; i<kMaxConnections; i++) {
+	auto it = &m_sockets[i];
     if (!(*it) || (*it)->getReadyState() != WebSocket::ReadyState::OPEN)
       continue;
 
     (*it)->send(dataType, message, length);
   }
 }
-
+//-----------------------------------------------------------------------------
 void WebSocketServer::listen() {
   _cleanDeadConnections();
 
 #if NETWORK_CONTROLLER == NETWORK_CONTROLLER_WIFI
-  const auto end = &m_sockets[kMaxConnections];
 
   if (m_server.hasClient()) {
     WiFiClient client;
     WebSocket *ws{ nullptr };
 
-    for (auto it = &m_sockets[0]; it != end; ++it) {
+	for (uint8 i = 0; i<kMaxConnections; i++) {
+	  auto it = &m_sockets[i];
       if (!(*it)) {
         client = m_server.available();
         if (_handleRequest(client)) {
@@ -55,25 +53,28 @@ void WebSocketServer::listen() {
         }
         break;
       }
-    }
-
-     // Server is full ...
+	}
+    // Server is full ...
     if (!ws) _rejectRequest(client, WebSocketError::SERVICE_UNAVAILABLE);
   }
 
-  for (auto it = &m_sockets[0]; it != end; ++it) {
+  for (uint8 i = 0; i<kMaxConnections; i++) {
+	auto it = &m_sockets[i];
     if (*it && (*it)->m_client.connected()) {
       if ((*it)->m_client.available()) (*it)->_readFrame();
     }
   }
-#else
+#else // NETWORK_CONTROLLER == ETHERNET_CONTROLLER_W5X00
+
   EthernetClient client = m_server.available();
-  if (client && client.available()) {
+  int num;
+  if (client && (num = client.available())) {
+    printf("_listen_available:%u_",num);
     WebSocket *ws{ _getWebSocket(client) };
 
     if (!ws) {
-      const auto end = &m_sockets[kMaxConnections];
-      for (auto it = &m_sockets[0]; it != end; ++it) {
+	  for (uint8 i = 0; i<kMaxConnections; i++) {
+		auto it = &m_sockets[i];
         if (!(*it)) {
           if (_handleRequest(client)) {
             *it = new WebSocket(client);
@@ -82,35 +83,36 @@ void WebSocketServer::listen() {
           }
           break;
         }
-      }
-
+	  }
       // Server is full ...
       if (!ws) _rejectRequest(client, WebSocketError::SERVICE_UNAVAILABLE);
-    }
-
-    if (ws) ws->_readFrame();
+    } else {
+		ws->_readFrame();
+	}
   }
 #endif
 }
-
+//-----------------------------------------------------------------------------
 uint8_t WebSocketServer::countClients() const {
   uint8_t count{ 0 };
-  const auto end = &m_sockets[kMaxConnections];
-  for (auto it = &m_sockets[0]; it != end; ++it)
+  for (uint8 i = 0; i<kMaxConnections; i++) {
+	auto it = &m_sockets[i];
     if (*it && (*it)->isAlive()) ++count;
+  }
 
   return count;
 }
-
+//-----------------------------------------------------------------------------
 WebSocket *WebSocketServer::_getWebSocket(NetClient &client) const {
-  const auto end = &m_sockets[kMaxConnections];
-  for (auto it = &m_sockets[0]; it != end; ++it)
+	printf("<_getWS>");
+  for (uint8 i = 0; i<kMaxConnections; i++) {
+	auto it = &m_sockets[i];
     if (*it && (*it)->m_client == client) return *it;
-
+  }
   return nullptr;
 }
 
-//
+//-----------------------------------------------------------------------------
 // Read client request:
 //
 // [1] GET /chat HTTP/1.1
@@ -120,12 +122,13 @@ WebSocket *WebSocketServer::_getWebSocket(NetClient &client) const {
 // [5] Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==
 // [6] Sec-WebSocket-Version: 13
 // [7]
-//
+//-----------------------------------------------------------------------------
 bool WebSocketServer::_handleRequest(NetClient &client) {
+	printf("<_handleReqest");
 #if NETWORK_CONTROLLER == NETWORK_CONTROLLER_WIFI
   while (!client.available()) {
     delay(10);
-    __debugOutput(F("."));
+    __debugOutput(("."));
   }
 #endif
 
@@ -153,7 +156,7 @@ bool WebSocketServer::_handleRequest(NetClient &client) {
       char *rest{ buffer };
 
 #ifdef _DUMP_HANDSHAKE
-      printf(F("[Line #%u] %s\n"), currentLine, buffer);
+      printf(("[Line #%u] %s\n"), currentLine, buffer);
 #endif
 
       //
@@ -263,8 +266,9 @@ bool WebSocketServer::_handleRequest(NetClient &client) {
   _rejectRequest(client, WebSocketError::BAD_REQUEST);
   return false;
 }
-
+//-----------------------------------------------------------------------------
 bool WebSocketServer::_isValidGET(char *line) {
+	printf("<_isValidGET");
   char *rest{ line };
   for (byte i = 0; rest != nullptr; ++i) {
     char *pch{ strtok_r(rest, " ", &rest) };
@@ -291,12 +295,14 @@ bool WebSocketServer::_isValidGET(char *line) {
 
   return true;
 }
-
+//-----------------------------------------------------------------------------
 bool WebSocketServer::_isValidUpgrade(const char *value) {
+	printf("<_isValidUpgrade");
   return strcasecmp_P(value, (PGM_P)F("websocket")) == 0;
 }
-
+//-----------------------------------------------------------------------------
 bool WebSocketServer::_isValidConnection(char *value) {
+	printf("<_isValidConnection");
   char *rest{ value };
   char *item{ nullptr };
 
@@ -310,8 +316,9 @@ bool WebSocketServer::_isValidConnection(char *value) {
 
   return false;
 }
-
+//-----------------------------------------------------------------------------
 bool WebSocketServer::_isValidVersion(uint8_t version) {
+	printf("<_isValidVersion");
   switch (version) {
   case 8:
   case 13:
@@ -321,9 +328,10 @@ bool WebSocketServer::_isValidVersion(uint8_t version) {
     return false;
   }
 }
-
+//-----------------------------------------------------------------------------
 WebSocketError WebSocketServer::_validateHandshake(
   uint8_t flags, const char *secKey) {
+	printf("<_validateHandshake");
   if (!(flags & (kValidUpgradeHeader | kValidConnectionHeader)))
     return WebSocketError::UPGRADE_REQUIRED;
 
@@ -332,9 +340,10 @@ WebSocketError WebSocketServer::_validateHandshake(
 
   return WebSocketError::NO_ERROR;
 }
-
+//-----------------------------------------------------------------------------
 void WebSocketServer::_rejectRequest(
   NetClient &client, const WebSocketError &code) {
+	printf("<_rejectRequest");
   switch (code) {
   case WebSocketError::CONNECTION_REFUSED: {
     client.println(F("HTTP/1.1 111 Connection refused"));
@@ -361,7 +370,7 @@ void WebSocketServer::_rejectRequest(
   client.stop();
 }
 
-//
+//-----------------------------------------------------------------------------
 // Send response:
 //
 // [1] HTTP/1.1 101 Switching Protocols
@@ -369,11 +378,12 @@ void WebSocketServer::_rejectRequest(
 // [3] Connection: Upgrade
 // [4] Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=
 // [5]
-//
+//-----------------------------------------------------------------------------
 void WebSocketServer::_acceptRequest(NetClient &client, const char *secKey) {
   char acceptKey[29]{};
   encodeSecKey(acceptKey, secKey);
 
+	printf("<_acceptRequest>");
   // 22 characters for header + 28 for accept key + 1 for NULL
   char secWebSocketAccept[51]{};
   strcpy_P(secWebSocketAccept, (PGM_P)F("Sec-WebSocket-Accept: "));
@@ -387,15 +397,13 @@ void WebSocketServer::_acceptRequest(NetClient &client, const char *secKey) {
   client.println(secWebSocketAccept);
   client.println();
 }
-
+//-----------------------------------------------------------------------------
 void WebSocketServer::_cleanDeadConnections() {
-  const auto end = &m_sockets[kMaxConnections];
-  for (auto it = &m_sockets[0]; it != end; ++it) {
+  for (uint8 i = 0; i<kMaxConnections; i++) {
+	auto it = &m_sockets[i];
     if (*it && !(*it)->isAlive()) {
       delete *it;
       *it = nullptr;
     }
   }
 }
-
-} // namespace net

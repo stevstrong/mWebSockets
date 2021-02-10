@@ -1,6 +1,14 @@
 #include "utility.h"
 #include <stdarg.h>
 
+
+#ifdef _DEBUG
+char dbg[512];
+#endif
+
+
+#if 0
+
 void printf(const __FlashStringHelper *fmt, ...) {
   char buffer[256]{};
   va_list args;
@@ -22,7 +30,9 @@ void printf(const __FlashStringHelper *fmt, ...) {
 #endif
 }
 
-namespace net {
+#endif
+
+
 
 IPAddress fetchRemoteIp(const NetClient &client) {
 #if (PLATFORM_ARCH == PLATFORM_ARCHITECTURE_ESP8266) &&                        \
@@ -34,5 +44,3 @@ IPAddress fetchRemoteIp(const NetClient &client) {
   return const_cast<NetClient &>(client).remoteIP();
 #endif
 }
-
-} // namespace net
