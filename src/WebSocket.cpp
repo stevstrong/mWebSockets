@@ -234,12 +234,11 @@ void WebSocket::_send(
   if (length <= 125) {
     bytesWritten +=
       m_client.write((mask ? 0x80 : 0x00) | static_cast<char>(length));
-  } else if (length <= 0xFFFF) {
+  } else {
     bytesWritten += m_client.write((mask ? 0x80 : 0x00) | 126);
     bytesWritten += m_client.write(static_cast<char>(length >> 8) & 0xFF);
     bytesWritten += m_client.write(static_cast<char>(length & 0xFF));
-  } else
-    return; // too big ...
+  }
 
 #ifdef _DUMP_HEADER
   printf(("TX FRAME : OPCODE=%u, FIN=%s, RSV=0, PAYLOAD-LEN=%u, MASK="),

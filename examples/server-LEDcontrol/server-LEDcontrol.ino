@@ -69,6 +69,7 @@ void wsOnMessageCallback(WebSocket &ws,
 						const char *payload,
 						uint16_t length)
 {
+	(void)ws;
 	switch (dataType) {
 	case WebSocket::DataType::TEXT:
 		Serial << "[WS] Rx " << length << " bytes: " << payload << endl;
@@ -96,7 +97,8 @@ void wsOnCloseCallback(WebSocket &ws,
 					const char *reason,
 					uint16_t length)
 {
-	Serial <<("WS disconnected, reason: ") << reason << endl;
+	(void)ws;
+	Serial <<("WS disconnected, code: ") << code << (", reason: ") << reason << (", length: ") << length << endl;
 
 	wsConnected = false;
 }
