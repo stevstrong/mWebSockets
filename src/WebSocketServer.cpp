@@ -87,8 +87,8 @@ void WebSocketServer::listen() {
       // Server is full ...
       if (!ws) _rejectRequest(client, WebSocketError::SERVICE_UNAVAILABLE);
     } else {
-		ws->_readFrame();
-	}
+      ws->_readFrame();
+    }
   }
 #endif
 }
@@ -178,13 +178,13 @@ bool WebSocketServer::_handleRequest(NetClient &client) {
           //
 
           // #TODO ... or not
-          if (strcmp_P(header, (PGM_P)F("Host")) == 0) {}
+          if (strcasecmp_P(header, (PGM_P)F("Host")) == 0) {}
 
           //
           // [3] Upgrade header:
           //
 
-          else if (strcmp_P(header, (PGM_P)F("Upgrade")) == 0) {
+          else if (strcasecmp_P(header, (PGM_P)F("Upgrade")) == 0) {
             value = strtok_r(rest, " ", &rest);
             if (!value || !_isValidUpgrade(value)) {
               _rejectRequest(client, WebSocketError::BAD_REQUEST);
@@ -198,16 +198,16 @@ bool WebSocketServer::_handleRequest(NetClient &client) {
           // [4] Connection header:
           //
 
-          else if (strcmp_P(header, (PGM_P)F("Connection")) == 0) {
-            value = strtok_r(rest, " ", &rest);
-            if (!value || _isValidConnection(value)) flags |= kValidConnectionHeader;
+          else if (strcasecmp_P(header, (PGM_P)F("Connection")) == 0) {
+            if (rest && _isValidConnection(rest))
+              flags |= kValidConnectionHeader;
           }
 
           //
           // [5] Sec-WebSocket-Key header:
           //
 
-          else if (strcmp_P(header, (PGM_P)F("Sec-WebSocket-Key")) == 0) {
+          else if (strcasecmp_P(header, (PGM_P)F("Sec-WebSocket-Key")) == 0) {
             value = strtok_r(rest, " ", &rest);
             if (value != nullptr) strcpy(secKey, value);
           }
@@ -216,7 +216,7 @@ bool WebSocketServer::_handleRequest(NetClient &client) {
           // [6] Sec-WebSocket-Version header:
           //
 
-          else if (strcmp_P(header, (PGM_P)F("Sec-WebSocket-Version")) == 0) {
+          else if (strcasecmp_P(header, (PGM_P)F("Sec-WebSocket-Version")) == 0) {
             value = strtok_r(rest, " ", &rest);
             if (!value || !_isValidVersion(atoi(value))) {
               _rejectRequest(client, WebSocketError::BAD_REQUEST);
@@ -308,7 +308,7 @@ bool WebSocketServer::_isValidConnection(char *value) {
 
   // Firefox sends: "Connection: keep-alive, Upgrade"
   // simple "includes" check:
-  while ((item = strtok_r(rest, " ,", &rest))) {
+  while ((item = strtok_r(rest, ",", &rest))) {
     if (strstr_P(item, (PGM_P)F("Upgrade")) != nullptr) {
       return true;
     }
@@ -332,8 +332,10 @@ bool WebSocketServer::_isValidVersion(uint8_t version) {
 WebSocketError WebSocketServer::_validateHandshake(
   uint8_t flags, const char *secKey) {
 	printf("<_validateHandshake");
-  if (!(flags & (kValidUpgradeHeader | kValidConnectionHeader)))
+  if ((flags & (kValidConnectionHeader | kValidUpgradeHeader)) !=
+      (kValidConnectionHeader | kValidUpgradeHeader)) {
     return WebSocketError::UPGRADE_REQUIRED;
+  }
 
   if (!(flags & kValidVersion) || strlen(secKey) == 0)
     return WebSocketError::BAD_REQUEST;

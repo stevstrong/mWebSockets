@@ -144,7 +144,7 @@ bool WebSocketClient::_readResponse() {
           // [2] Upgrade header:
           //
 
-          if (strcmp_P(header, (PGM_P)F("Upgrade")) == 0) {
+          if (strcasecmp_P(header, (PGM_P)F("Upgrade")) == 0) {
             value = strtok_r(rest, " ", &rest);
             if (!value || (strcasecmp_P(value, (PGM_P)F("websocket")) != 0)) {
               __debugOutput(("Error during WebSocket handshake: 'Upgrade' "
@@ -161,9 +161,9 @@ bool WebSocketClient::_readResponse() {
           // [3] Connection header:
           //
 
-          else if (strcmp_P(header, (PGM_P)F("Connection")) == 0) {
+          else if (strcasecmp_P(header, (PGM_P)F("Connection")) == 0) {
             value = strtok_r(rest, " ", &rest);
-            if (!value || (strcmp_P(value, (PGM_P)F("Upgrade")) != 0)) {
+            if (!value || (strcasecmp_P(value, (PGM_P)F("Upgrade")) != 0)) {
               __debugOutput(
                 ("Error during WebSocket handshake: 'Connection' header "
                   "value is not 'Upgrade': %s\n"),
@@ -179,7 +179,7 @@ bool WebSocketClient::_readResponse() {
           // [4] Sec-WebSocket-Accept header:
           //
 
-          else if (strcmp_P(header, (PGM_P)F("Sec-WebSocket-Accept")) == 0) {
+          else if (strcasecmp_P(header, (PGM_P)F("Sec-WebSocket-Accept")) == 0) {
             value = strtok_r(rest, " ", &rest);
 
             char encodedKey[29]{};
