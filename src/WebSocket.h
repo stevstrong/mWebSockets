@@ -215,8 +215,8 @@ public:
   void send(
     const WebSocket::DataType dataType, const char *message, uint16_t length);
 
-  void sendTXT(const char *message, uint16_t length) {
-	  send(WebSocket::DataType::TEXT, message, length); }
+  void sendTXT(const char *message) {
+	  send(WebSocket::DataType::TEXT, message, strlen(message)); }
 
   /**
    * @brief Sends ping message.

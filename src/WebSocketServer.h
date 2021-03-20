@@ -50,8 +50,9 @@ public:
   void broadcast(
     const WebSocket::DataType &dataType, const char *message, uint16_t length);
 
-	void broadcast(const char *message, uint16_t length) {
-		broadcast(WebSocket::DataType::TEXT, message, length); }
+  void broadcast(const char *message) {
+    broadcast(WebSocket::DataType::TEXT, message, strlen(message));
+  }
 
   /** @note Call this in main loop. */
   void listen();

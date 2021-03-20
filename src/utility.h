@@ -29,8 +29,9 @@ extern char dbg[];
 #endif
 
 # define __debugOutput printf
+#ifndef PRINTF
 # define PRINTF printf
-
+#endif
 
 IPAddress fetchRemoteIp(const NetClient &client);
 
